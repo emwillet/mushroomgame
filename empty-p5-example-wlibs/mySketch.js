@@ -1,111 +1,136 @@
-var moonImages = [12];
+let walkingCharacter;
+let scene;
+let speed = 1;
 
-var myImage;
-var sunImage;
-var moonImage;
+let myMushrooms = [];
+let collect;
 
-var time1 = 8000;
-var time2 = 24000;
-var time3 = 40000;
-var time4 = 56000;
-var time5 = 64000;
 
 var atmos = {
 	angle: 0.0,
 	offset: 800,
 	scalar: 150,
 	speed: 0.075,
-	x: 0,
+	x: 0
 }
 
-var sun = {
-	 angle: 0.0,
-	 offset: 800,
-	 scalar: 150,
-	 speed: 0.075,
-}
 
-var moon = {
-	 angle: 0.0,
-	 offset: 800,
-	 scalar: 150,
-	 speed: 0.075,
-}
 
 function preload(){
-	myImage = loadImage("media/day-to-night-fade-final2.jpg");
-	sunImage = loadImage("media/sun3.png");
-	moonImage = loadImage("media/moonbetter.png");
-	moonImages[0] = loadImage("media/moonbetter00.png");
-	moonImages[1] = loadImage("media/moonbetter01.png");
-	moonImages[2] = loadImage("media/moonbetter02.png");
-	moonImages[3] = loadImage("media/moonbetter03.png");
-	moonImages[4] = loadImage("media/moonbetter04.png");
-	moonImages[5] = loadImage("media/moonbetter05.png");
-	moonImages[6] = loadImage("media/moonbetter06.png");
-	moonImages[7] = loadImage("media/moonbetter07.png");
-	moonImages[8] = loadImage("media/moonbetter08.png");
-	moonImages[9] = loadImage("media/moonbetter09.png");
-	moonImages[10] = loadImage("media/moonbetter10.png");
-	moonImages[11] = loadImage("media/moonbetter11.png");
+	scene = loadImage ("scenev2extended-01.png");
+	mushroom = loadImage ("mushroom.gif");
+	spider = loadImage ("spider.gif");
+	
+	walk = loadImage("walking2-01.png");
+	jump = loadImage("jumping2-01.png");
+	duck = loadImage("ducking-01.png");
 
+	walkingCharacter = new Character(walk, 6, 6, 1, 170, 312, 12);
+		
+	for (let x = 0; x < 5; x++){
+		myMushrooms.push(new Mushroom(mushroom, random(0,1200),random(350,500)));
+	}
 }
+	
 
 function setup() {
-  createCanvas(800, 800);
+	image(scene, width/2, height/2,  scene.width/2, scene.height/2);
+	createCanvas(1200, 600);
+	walkingCharacter.makeSpriteArray();
+	walkingCharacter.place(width/2,height/2);		
+
+	collect = new TriggeredObject(width/2,height/2, myMushrooms, 6, 300);
+	collect.setSize(100, 100);
+	
 }
 
 function draw() {
-	background(100);
+	//print(walkingCharacter.position); //ERIN - you don't any attributes in Character class called position
+	background(255);
 	atmosDraw();
-	drawSun();
-	moonDraw();
+	interactives();
+	walkingCharacter.update();
+	walkingCharacter.draw(); 
+	
+	
+	
+	for (let x = 0; x < myMushrooms.length; x++){
+		myMushrooms[x].draw();
+	}
+	// collect.isTriggered(walkingCharacter.x, walkingCharacter.y); //update variables in triggered object
+	// collect.update();
+	// collect.draw();
+	
+
+	// if (state == 'w') {
+	// jumpingCharacter.draw(); 
+	// 	jumpingCharacter.update();
+	// } else if (state == 'q') {
+	// duckingCharacter.draw(); 
+	// 	duckingCharacter.update();
+	// } else if (state == 'a' || state == 'd') {
+	// walkingCharacter.draw(); 
+	// 	walkingCharacter.update();
+	// }	
 }
 
-	function atmosDraw() {
-	image(myImage, atmos.x, 0,  myImage.width-width, myImage.height);
-		if (atmos.x < -myImage.width + (width*3)) {
-			atmos.x = 0;
+
+
+function keyPressed() {
+	if (key == 'e') {
+		walkingCharacter.jump();
+	}
+	
+	if (key == 'q') {
+		walkingCharacter.duck();
+	}
+}
+
+
+function interactives (){
+		image(spider, 750, 300,  spider.width, spider.height);
+}
+
+function atmosDraw() {
+		image(scene, atmos.x+1200, height/2,  (scene.width/2), scene.height/2);
+	
+		//if (this.x == (width-50)) {
+	 	//	atmos.x = atmos.x - atmos.speed*20;
+		//}
+		
+		// console.log("walkingCharacter.x = " + str(walkingCharacter.x));
+	print(walkingCharacter.x);
+	
+		if (walkingCharacter.x == (980) && walkingCharacter.bCharacterMoving == true) {
+	 		atmos.x = atmos.x - atmos.speed*20;
+			if (atmos.x < -scene.width + (width*2)) {
+					atmos.x = 0;
+			}
 		}
-	atmos.x = atmos.x - atmos.speed*30;
-	// print(atmos.x);
-	}
-
-	function drawSun() {
-	var x = sun.offset/2 + (6*cos(sun.angle/2)) * sun.scalar;
-	var y = sun.offset + (4*sin(sun.angle/2)) * sun.scalar;
-	image(sunImage, x, y, sunImage.width/2, sunImage.height/2);
-	sun.angle += sun.speed/5;
-	}
-
-	function moonDraw(){
-	var a = moon.offset/2 + (6*sin(moon.angle/2)) * moon.scalar;
-  var b = moon.offset + (4*cos(moon.angle/2)) * moon.scalar;
-	// print(cos(moon.angle/2));
-	print(sin(moon.angle/2));
-		var i = int(random(0,11)); //figure out rotating out images in array
-		// if (a < -0.96 || a > - 0.73){
-		// 	a= -0.70
-	image(moonImages[i], a, b , moonImage.width/10, moonImage.height/10);
-  moon.angle += moon.speed/5;
+	
+	if (walkingCharacter.x == (220) && walkingCharacter.bCharacterMoving == true) {
+	 		atmos.x = atmos.x + atmos.speed*20;
+			if (atmos.x < scene.width + (width*2)) {
+					atmos.x = 0;
+			}
+		}
+	
 	}
 
 
 
-	//TO DOS:
-	//put constraints on moon and sun movements
-	//create moon images an put in an array
-	//add audio
+// Requirements-- 
+// animated or moving elements X
+// use an array X
+// use a timing mechanism ___
+// use a loop X
+// use a class X
+// use multiple sprite animations ___
+// have a number of conditional statements which 
+//    trigger responsive animations and media effects ___
 
-
-	//MUSTS:
-	//1. moving element X
-	//2. use an array
-	//3. timing mechanism X
-	//4. a loop
-	//5. conditional statements X
-  //6. a class with an object
-	//EXTRA CRED:
-	//1. input - add clickable button or interactive control
-  //2. audio
-  //3. external data - have clock receive external data from some source
+// Advanced challenge(s), pick one if it appeals to you (not required):
+// + create elements within the scene which block the characters movement (like walls)
+// + have a puzzle mechanic, where multiple elements have to be triggered in 
+// 		a particular sequence, to solve the “puzzle”
+// + have some game mechanic, like “shooting” a projectile, to trigger an animation
